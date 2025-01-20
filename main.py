@@ -84,7 +84,7 @@ def mock_llm_api_call(messages):
 # -----------------------------
 # 2) Define the iterative logic
 # -----------------------------
-def improve_description(example, score_threshold=0.9, max_iterations=3):
+def improve_description(example, score_threshold=0.9, max_iterations=1):
     # Transform the text into embeddings
     example_embedding = mock_transform_embedding(example)
     best_score = mock_gbm_predict(example_embedding)[0] 
