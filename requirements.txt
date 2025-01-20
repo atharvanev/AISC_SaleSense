@@ -1,2 +1,4 @@
 streamlit
 lightgbm
+ollama
+sentence_transformers
