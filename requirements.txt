@@ -1,4 +1,4 @@
 streamlit
 lightgbm
 git+https://github.com/ollama/ollama-python.git
-sentence_transformers
+sentence-transformers
