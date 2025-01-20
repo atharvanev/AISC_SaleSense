@@ -1,7 +1,7 @@
 import streamlit as st
 import lightgbm
-from ollama import chat
 from sentence_transformers import SentenceTransformer
+from ollama import chat
 
 # -----------------------------
 # 1) Load models and embeddings
