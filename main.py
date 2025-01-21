@@ -1,6 +1,5 @@
 import streamlit as st
 import lightgbm
-import random
 from ollama import chat
 from sentence_transformers import SentenceTransformer
 
@@ -63,21 +62,21 @@ def mock_gbm_predict(embedding):
     gbm = lightgbm.Booster(model_file='lightgbm_model_light_we.txt')
     return gbm.predict(embedding) # returns a list with a random float as mock score
 
-def mock_llm_api_call(messages):
-    """
-    Placeholder function for your real LLM API.
-    In production, replace with your actual call to llama3.2 or other API.
-    """
-    user_message = [m for m in messages if m["role"] == "user"][0]["content"]
-    desc = user_message.split("Description:")[-1].strip()
-    return {
-        "content": "Description: " + desc + " (improved)"
-    }
+# def mock_llm_api_call(messages):
+#     """
+#     Placeholder function for your real LLM API.
+#     In production, replace with your actual call to llama3.2 or other API.
+#     """
+#     user_message = [m for m in messages if m["role"] == "user"][0]["content"]
+#     desc = user_message.split("Description:")[-1].strip()
+#     return {
+#         "content": "Description: " + desc + " (improved)"
+#     }
 
 # -----------------------------
 # 2) Define the iterative logic
 # -----------------------------
-def improve_description(example, score_threshold=0.9, max_iterations=12):
+def improve_description(example, score_threshold=0.9, max_iterations=6):
     # Transform the text into embeddings
     example_embedding = mock_transform_embedding(example)
     best_score = mock_gbm_predict(example_embedding)[0] 
@@ -109,8 +108,11 @@ def improve_description(example, score_threshold=0.9, max_iterations=12):
 
 
         # 2a) Call your LLM to get improved text
-        response = mock_llm_api_call(messages)
-        new_description = response["content"].split("Description:")[-1].strip()
+        response = chat(model="llama3.2", messages=messages)
+    
+    # Extract the new description from the response
+    # Assumes the response content is in the format: "Description: ..."
+        new_description = response['message']['content'].split(':')[-1]
 
         # 2b) Predict the new score with your GBM
         new_embedding = mock_transform_embedding(new_description)
@@ -130,9 +132,6 @@ def improve_description(example, score_threshold=0.9, max_iterations=12):
 
     return first_example, first_score, best_text, best_score, percent_of_change
 
-# -----------------------------
-# 3) Build the Streamlit UI
-# -----------------------------
 def main():
     st.title("Iterative Text Improvement Demo")
 
