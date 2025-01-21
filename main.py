@@ -1,7 +1,8 @@
 import streamlit as st
 import lightgbm
-from sentence_transformers import SentenceTransformer
+import random
 from ollama import chat
+from sentence_transformers import SentenceTransformer
 
 # -----------------------------
 # 1) Load models and embeddings
@@ -48,26 +49,18 @@ class Text2Embedding():
         embedding = self.sentence2vector(input)
         return embedding.reshape(1, 1024)
     
-@st.cache_resource
-def load_model():
-    # Load the model (e.g., from Hugging Face)
-    model = SentenceTransformer(
-        "dunzhang/stella_en_1.5B_v5",
-        device="mps",  # Use Metal Performance Shaders on Apple Silicon
-        config_kwargs={"use_memory_efficient_attention": False},  # Optional settings
-        trust_remote_code=True  # Allow remote execution of model code
-    )
-    return model
+    
+word_embedding = SentenceTransformer("dunzhang/stella_en_400M_v5", device="mps", config_kwargs={"use_memory_efficient_attention": False, "unpad_inputs": False}, trust_remote_code=True)
 
 
 def mock_transform_embedding(text):
-    transform_embedding = Text2Embedding(load_model())
+    transform_embedding = Text2Embedding(word_embedding)
     embedding = transform_embedding.transform(text)
     return embedding
         
 def mock_gbm_predict(embedding):
     # This would actually use your GBM to predict a score
-    gbm = lightgbm.Booster(model_file='model_gbm.txt')
+    gbm = lightgbm.Booster(model_file='lightgbm_model_light_we.txt')
     return gbm.predict(embedding) # returns a list with a random float as mock score
 
 def mock_llm_api_call(messages):
@@ -84,7 +77,7 @@ def mock_llm_api_call(messages):
 # -----------------------------
 # 2) Define the iterative logic
 # -----------------------------
-def improve_description(example, score_threshold=0.9, max_iterations=1):
+def improve_description(example, score_threshold=0.9, max_iterations=6):
     # Transform the text into embeddings
     example_embedding = mock_transform_embedding(example)
     best_score = mock_gbm_predict(example_embedding)[0] 
@@ -97,25 +90,23 @@ def improve_description(example, score_threshold=0.9, max_iterations=1):
 
     i = 1
     while best_score < score_threshold and i <= max_iterations:
+      #  - The user message includes the current score and the text to improve
         messages = [
-            {
-                "role": "system",
-                "content": (
-                    "Your task is to improve the description based on the 'score'. "
-                    "Try to maximize 'score' which indicates how good the description is. "
-                    "Keep all essential information like sizes, colors, brand, etc. "
-                    "Only return the 'Description' text."
-                )
-            },
-            {
-                "role": "user",
-                "content": f"Score: {best_score:.2f} | Description: {example}"
-            },
-            {
-                "role": "assistant",
-                "content": f"Previous response: Score: {first_score:.2f} | Description: {first_example}"
-            }
+        {
+            "role": "system",
+            "content": (
+                "You task is to improve the description based on the 'score' , "
+                "try to maximize 'score' which indicates how good is the description, "
+                "also keep all the essential information like (sizes, colors, brand, etc). "
+                "Note just return the 'Description'"
+            )
+        },
+        {
+            "role": "user",
+            "content": f"Score: {best_score:.2f} | Description: {example}"
+        }
         ]
+
 
         # 2a) Call your LLM to get improved text
         response = mock_llm_api_call(messages)
@@ -172,3 +163,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
