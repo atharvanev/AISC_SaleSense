@@ -119,7 +119,7 @@ def improve_description(example, score_threshold=0.9, max_iterations=6):
         new_score = float(mock_gbm_predict(new_embedding)[0])
 
         # 2c) If better, update best
-        if new_score > best_score:
+        if new_description and new_score > best_score:
             best_score = new_score
             best_text = new_description
 
