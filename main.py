@@ -146,23 +146,27 @@ def main():
             text-align: center;
         }
         </style>
-        <div class="navbar">A data driven tool for product descriptions.</div>
+        <div class="navbar">A data driven tool for clothing resale descriptions.</div>
         """,
         unsafe_allow_html=True
     )
     
-    st.title("Iterative Text Improvement Demo")
+    st.title("SaleSense: Optimizing Clothing Resale")
     st.markdown(
         """
         **Easy to Use ✅** | **Reliable ✅** | **Constructive Feedback ✅**
 
         Solutions that bring engagement and increase conversions for your listings.
 
+        Elevate your resale business with Salesense, the intelligent tool that __leverages data__ 📊 to craft compelling, accurate descriptions for your clothing 👕 listings. Harness the power of analytics📈 to make every product stand out and drive more sales 🤑.
+
+
+
         """
     )
     # User inputs a product description (or any text)
     user_input = st.text_area(
-        "Enter your original description:",
+        "***Enter your original description:***",
         value=(
             "Authentic vintage Chanel made out of luxurious black lambskin. "
             "Featuring gold CC closure. Size W: 25cm H: 17cm Size D: 2cm. "
@@ -185,7 +189,7 @@ def main():
             st.write("The model encountered an error while please click improve description again(it may have to be clicked more than once)")
         else:
             st.write("**Improved Description:**", best_description)
-            st.write("**Best Score:**", best_score)
+            st.write("**New Score:**", best_score)
             st.write(f"**Percent Improvement:** {pct_improvement:.2f}%")
 
 if __name__ == "__main__":
