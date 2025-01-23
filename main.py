@@ -86,7 +86,7 @@ def improve_description(example, score_threshold=0.9, max_iterations=6):
     first_example = example
     first_score = best_score
     best_text = example
-
+    print(first_score)
     i = 1
     while best_score < score_threshold and i <= max_iterations:
       #  - The user message includes the current score and the text to improve
@@ -119,6 +119,7 @@ def improve_description(example, score_threshold=0.9, max_iterations=6):
         new_score = float(mock_gbm_predict(new_embedding)[0])
 
         # 2c) If better, update best
+        print(best_score)
         if new_description and new_score > best_score:
             best_score = new_score
             best_text = new_description
@@ -133,8 +134,32 @@ def improve_description(example, score_threshold=0.9, max_iterations=6):
     return first_example, first_score, best_text, best_score, percent_of_change
 
 def main():
+    st.set_page_config(page_title="SaleSense", layout="wide")
+    st.markdown(
+        """
+        <style>
+        .navbar {
+            background-color: #6a0dad;
+            padding: 10px;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+        </style>
+        <div class="navbar">A data driven tool for product descriptions.</div>
+        """,
+        unsafe_allow_html=True
+    )
+    
     st.title("Iterative Text Improvement Demo")
+    st.markdown(
+        """
+        **Easy to Use ✅** | **Reliable ✅** | **Constructive Feedback ✅**
 
+        Solutions that bring engagement and increase conversions for your listings.
+
+        """
+    )
     # User inputs a product description (or any text)
     user_input = st.text_area(
         "Enter your original description:",
@@ -156,9 +181,12 @@ def main():
         st.subheader("Results")
         st.write("**Original Description:**", original_description)
         st.write("**Original Score:**", original_score)
-        st.write("**Improved Description:**", best_description)
-        st.write("**Best Score:**", best_score)
-        st.write(f"**Percent Improvement:** {pct_improvement:.2f}%")
+        if (best_score == original_score):
+            st.write("The model encountered an error while please click improve description again(it may have to be clicked more than once)")
+        else:
+            st.write("**Improved Description:**", best_description)
+            st.write("**Best Score:**", best_score)
+            st.write(f"**Percent Improvement:** {pct_improvement:.2f}%")
 
 if __name__ == "__main__":
     main()
