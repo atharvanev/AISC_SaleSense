@@ -25,8 +25,14 @@ To install the necessary libraries, run the following command:
 ```
 pip install streamlit lightgbm git+https://github.com/ollama/ollama-python.git sentence-transformers
 ```
+### Step 3: Installing the Model Weight
 
-### Step 3: Running the App
+1. **Make sure to download Ollama 3.2:3b**. You can do this by running the following command:
+
+   ```
+   ollama pull llama3.2:3b
+   ```
+### Step 4: Running the App
 After installing the required libraries, you can start the Streamlit app by running:
 ```
 streamlit run app.py
