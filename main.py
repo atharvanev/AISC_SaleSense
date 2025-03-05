@@ -49,7 +49,7 @@ class Text2Embedding():
         return embedding.reshape(1, 1024)
     
     
-word_embedding = SentenceTransformer("dunzhang/stella_en_400M_v5", device="cpu", config_kwargs={"use_memory_efficient_attention": False, "unpad_inputs": False}, trust_remote_code=True)
+word_embedding = SentenceTransformer("dunzhang/stella_en_400M_v5", device="mps", config_kwargs={"use_memory_efficient_attention": False, "unpad_inputs": False}, trust_remote_code=True)
 
 
 def mock_transform_embedding(text):
@@ -108,7 +108,7 @@ def improve_description(example, score_threshold=0.9, max_iterations=6):
 
 
         # 2a) Call your LLM to get improved text
-        response = chat(model="llama3.2", messages=messages)
+        response = chat(model="llama3.2:3b", messages=messages)
     
     # Extract the new description from the response
     # Assumes the response content is in the format: "Description: ..."

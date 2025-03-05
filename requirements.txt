@@ -2,4 +2,4 @@ streamlit
 lightgbm
 git+https://github.com/ollama/ollama-python.git
 sentence-transformers
-ollama
+
