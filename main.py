@@ -81,7 +81,7 @@ class Text2Embedding():
         return embedding.reshape(1, 1024)
     
     
-word_embedding = SentenceTransformer("dunzhang/stella_en_400M_v5", device="mps", config_kwargs={"use_memory_efficient_attention": False, "unpad_inputs": False}, trust_remote_code=True)
+word_embedding = SentenceTransformer("dunzhang/stella_en_400M_v5", device="cpu", config_kwargs={"use_memory_efficient_attention": False, "unpad_inputs": False}, trust_remote_code=True)
 
 
 def mock_transform_embedding(text):
