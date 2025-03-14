@@ -1,6 +1,7 @@
 import streamlit as st
 import lightgbm
-from ollama import chat
+#from ollama import chat
+import google.generativeai as genai
 from sentence_transformers import SentenceTransformer
 
 # -----------------------------
@@ -10,10 +11,41 @@ from sentence_transformers import SentenceTransformer
 # word_embedding = joblib.load('path/to/word_embedding.pkl')
 # gbm = joblib.load('path/to/gbm.pkl')
 #
-# If your "Text2Embedding(word_embedding)" is a class, instantiate it:
+# If your "Text2Embedding(word_embedding)" is a class, instantiaxte it:
 # transform_embedding = Text2Embedding(word_embedding)
 
 # Mock placeholders to illustrate
+
+
+# Configure the API with your Gemini API key
+genai.configure(api_key= st.secrets["api"]["key"])
+
+# Use Gemini 2 Flash
+model = genai.GenerativeModel("gemini-2.0-flash")
+
+
+def call_gemini(messages):
+    """
+    Calls Gemini 2 Flash API to improve the product description.
+    """
+    #user_message = messages[-1]["parts"]  # Get the last user input
+
+    # Get response from Gemini
+    response = model.generate_content(messages)
+
+    # Extract only the improved description from the response
+    #new_description = response.text.split(':')[-1].strip()
+
+    new_description = response.text.strip()  # Directly get the improved text without splitting
+
+    return new_description
+
+# response = chat(model="llama3.2:3b", messages=messages)
+# new_description = response['message']['content'].split(':')[-1]
+
+
+
+
 class Text2Embedding():
     def __init__(self, model):
         """
@@ -62,16 +94,6 @@ def mock_gbm_predict(embedding):
     gbm = lightgbm.Booster(model_file='lightgbm_model_light_we.txt')
     return gbm.predict(embedding) # returns a list with a random float as mock score
 
-# def mock_llm_api_call(messages):
-#     """
-#     Placeholder function for your real LLM API.
-#     In production, replace with your actual call to llama3.2 or other API.
-#     """
-#     user_message = [m for m in messages if m["role"] == "user"][0]["content"]
-#     desc = user_message.split("Description:")[-1].strip()
-#     return {
-#         "content": "Description: " + desc + " (improved)"
-#     }
 
 # -----------------------------
 # 2) Define the iterative logic
@@ -90,29 +112,32 @@ def improve_description(example, score_threshold=0.9, max_iterations=6):
     i = 1
     while best_score < score_threshold and i <= max_iterations:
       #  - The user message includes the current score and the text to improve
-        messages = [
-        {
-            "role": "system",
-            "content": (
-                "You task is to improve the description based on the 'score' , "
-                "try to maximize 'score' which indicates how good is the description, "
-                "also keep all the essential information like (sizes, colors, brand, etc). "
-                "Note just return the 'Description'"
-            )
-        },
-        {
-            "role": "user",
-            "content": f"Score: {best_score:.2f} | Description: {example}"
-        }
-        ]
+        messages = (
+        "Your task is to improve the given product description while keeping all key details intact. "
+         "You MUST maximize the 'score' by making the description more engaging, informative, and persuasive. "
+        "IMPORTANT: Your response should ONLY contain the improved product description. "
+        "You are NOT allowed to provide any commentary, explanations, or suggestions—just return the improved text. "
+        "The response must not contain any additional information. "
+        "dont hallucinate or make up things only base of known information"
+        "dont add extra features only improve on desciptiveness"
+        "Return ONLY the improved product description and nothing else. Do NOT provide any commentary, context, or services."
+        f"Score: {best_score:.2f} | Description: {example}"
+        #"reply understood if you understand"
+    )
 
 
         # 2a) Call your LLM to get improved text
-        response = chat(model="llama3.2:3b", messages=messages)
+
+            #response = chat(model="llama3.2:3b", messages=messages)
     
-    # Extract the new description from the response
-    # Assumes the response content is in the format: "Description: ..."
-        new_description = response['message']['content'].split(':')[-1]
+        # Extract the new description from the response
+        # Assumes the response content is in the format: "Description: ..."
+
+        #new_description = response['message']['content'].split(':')[-1]
+
+        new_description = call_gemini(messages)
+
+
 
         # 2b) Predict the new score with your GBM
         new_embedding = mock_transform_embedding(new_description)
