@@ -4,6 +4,8 @@ import lightgbm
 import google.generativeai as genai
 from sentence_transformers import SentenceTransformer
 
+st.set_page_config(page_title="SaleSense", layout="wide")
+
 # -----------------------------
 # 1) Load models and embeddings
 # -----------------------------
@@ -22,6 +24,16 @@ genai.configure(api_key= st.secrets["api"]["key"])
 
 # Use Gemini 2 Flash
 model = genai.GenerativeModel("gemini-2.0-flash")
+
+
+@st.cache_resource
+def load_sentence_transformer():
+    return SentenceTransformer(
+        "dunzhang/stella_en_400M_v5",
+        device="cpu",
+        config_kwargs={"use_memory_efficient_attention": False, "unpad_inputs": False},
+        trust_remote_code=True
+    )
 
 
 def call_gemini(messages):
@@ -80,8 +92,9 @@ class Text2Embedding():
         embedding = self.sentence2vector(input)
         return embedding.reshape(1, 1024)
     
-    
-word_embedding = SentenceTransformer("dunzhang/stella_en_400M_v5", device="cpu", config_kwargs={"use_memory_efficient_attention": False, "unpad_inputs": False}, trust_remote_code=True)
+#@st.cache_resource
+
+word_embedding =  load_sentence_transformer()
 
 
 def mock_transform_embedding(text):
@@ -159,7 +172,6 @@ def improve_description(example, score_threshold=0.9, max_iterations=6):
     return first_example, first_score, best_text, best_score, percent_of_change
 
 def main():
-    st.set_page_config(page_title="SaleSense", layout="wide")
     st.markdown(
         """
         <style>
