@@ -2,3 +2,4 @@ streamlit
 lightgbm
 google-generativeai
 sentence-transformers
+torch
